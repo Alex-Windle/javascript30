@@ -17,6 +17,61 @@
 <script>
 const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
 
+// Put json data into an array
+const cities = []; 
+fetch(endpoint)
+  .then(blob => blob.json())
+  .then(data => cities.push(...data)); 
+
+// compare the data against the data input
+function findMatches(wordsToMatch, cities){
+  // filter array for the city match 
+  return cities.filter(place => {
+    // figure out if the city or state matches what was searched
+    const regex = new RegExp(wordsToMatch, 'gi')
+    return place.city.match(regex) || place.state.match(regex)
+  }); 
+}
+
+// show data on the screen
+function displayMatches() {
+  const matchArray = findMatches(this.value, cities);
+  const html = matchArray.map(item => {
+    const regex = new RegExp(this.value, 'gi');
+    const cityName = item.city.replace(regex, `<span class="hl">${this.value}</span>`);
+    const stateName = item.state.replace(regex, `<span class="hl">${this.value}</span>`);
+    
+    let population = item.population;
+
+    if (population.length > 3 && population.length < 7){
+      population = population.split('');
+      population.reverse();
+      population.splice(3, 0, ',');
+      population = population.reverse().join('');
+    } else if (population.length >= 7 && population.length < 10) {
+      population = population.split('');
+      population.reverse();
+      population.splice(6, 0, ',');
+      population.splice(3, 0, ',');
+      population = population.reverse().join('');
+    }
+
+    return `
+      <li>
+        <span class="name">${cityName}, ${stateName}</span>
+        <span class="population">${population}</span>
+      </li>
+    `;
+  }).join('');
+  suggestions.innerHTML = html; 
+}
+
+const searchInput = document.querySelector('.search');
+const suggestions = document.querySelector('.suggestions'); 
+
+searchInput.addEventListener('change', displayMatches); 
+
+
 </script>
   </body>
 </html>
