@@ -7,6 +7,77 @@
 <body>
 <canvas id="draw" width="800" height="800"></canvas>
 <script>
+// Grab DOM
+const canvas = document.querySelector('#draw');
+// Set HTML canvas element to drawing context
+const ctx = canvas.getContext('2d');
+
+// Size drawing context
+canvas.width = window.innerWidth; 
+canvas.height = window.innerHeight;
+
+// Style stroke
+ctx.strokeStyle = 'blue'; // color 
+ctx.linewidth = 40;
+ctx.lineJoin = 'round';
+ctx.lineCap = 'round';
+let hue = 0; 
+let direction = true;
+
+// Flag indicates when drawing occurs.
+// Set to true on mousedown, false on mouseup.
+let isDrawing = false;
+// Line requires start and end coordinates.
+// These lets hold the value of the last mouseup 
+// ... where the next new line begins.
+let lastX;
+let lastY;
+
+function draw(e) {
+	if(!isDrawing) return; //stops fn 
+	// style line with ES6 template literal, embedded expression
+	ctx.strokeStyle = `hsl(${hue}, 100%, 70%)`;
+	ctx.lineWidth = 0; 
+	// start line
+	ctx.beginPath();
+	// line start
+	ctx.moveTo(lastX, lastY);
+	// line end
+	ctx.lineTo(e.offsetX, e.offsetY);
+	// render line to UI
+	ctx.stroke();
+	// ES6 feature: destructuring an array
+	[lastX, lastY] = [e.offsetX, e.offsetY]; 
+
+	hue++;
+	if (hue >= 360) {
+		hue = 0; 
+	}
+
+	if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
+		direction = !direction;
+	}
+
+	if (direction) {
+		ctx.lineWidth++;
+	} else if (!direction) {
+		ctx.lineWidth--;
+	}
+}
+
+// Tracks mouse movements over canvas.
+// Set flag isDrawing.
+canvas.addEventListener('mousedown', (e) => {
+	isDrawing = true;
+	[lastX, lastY] = [e.offsetX, e.offsetY]; 
+});
+
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mouseout', () => {
+	isDrawing = false;
+});
+
 </script>
 
 <style>
